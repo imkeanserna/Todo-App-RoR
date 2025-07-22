@@ -12,10 +12,10 @@ gem "puma", ">= 5.0"
 gem "jbuilder"
 
 # Import maps for Rails
-gem 'importmap-rails'
+gem "importmap-rails"
 
-# Tailwind CSS is a utility-first CSS framework for creating custom designs [https://tailwindcss.com/docs/installation#ruby-on-rails] 
-gem 'tailwindcss-rails'
+# Tailwind CSS is a utility-first CSS framework for creating custom designs [https://tailwindcss.com/docs/installation#ruby-on-rails]
+gem "tailwindcss-rails"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"

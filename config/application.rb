@@ -7,10 +7,10 @@ Bundler.require(*Rails.groups)
 module TodoApp
   class Application < Rails::Application
     config.load_defaults 7.0
-    
+
     # Time zone
-    config.time_zone = 'UTC'
-    
+    config.time_zone = "UTC"
+
     # Generator configurations
     config.generators do |g|
       g.test_framework :rspec
