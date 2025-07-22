@@ -1,4 +1,5 @@
 class TodosController < ApplicationController
+  before_action :authenticate_user!
   before_action :set_todo, only: [ :show, :edit, :update, :destroy, :toggle ]
 
   # GET /todos
@@ -15,7 +16,7 @@ class TodosController < ApplicationController
 
   # GET /todos/new
   def new
-    @todo = Todo.new
+    @todo = current_user.todos.build
   end
 
   # GET /todos/1/edit
@@ -24,15 +25,15 @@ class TodosController < ApplicationController
 
   # POST /todos
   def create
-    @todo = Todo.new(todo_params)
-    result = TodoService.new(todo_params).create_todo
+    @todo = current_user.todos.build(todo_params)
+    result = TodoService.new(todo_params.merge(user: current_user)).create_todo
 
     handle_service_result(result, todos_path) do |todo|
       redirect_to todos_path, notice: "Todo was successfully created."
     end
   rescue => e
     # Fallback in case of any errors
-    @todo ||= Todo.new(todo_params)
+    @todo ||= current_user.todos.build(todo_params)
     render :new
   end
 
@@ -71,6 +72,14 @@ class TodosController < ApplicationController
       return
     end
 
+    # Ensure the user can only perform actions on their own todos
+    user_todo_ids = current_user.todos.where(id: todo_ids).pluck(:id)
+
+    if user_todo_ids.empty?
+      redirect_to todos_path, alert: "No valid todos selected."
+      return
+    end
+
     result = case params[:bulk_action_type]
     when "complete"
                TodoService.new.bulk_complete(todo_ids)
@@ -90,7 +99,7 @@ class TodosController < ApplicationController
   private
 
   def set_todo
-    @todo = Todo.find(params[:id])
+    @todo = current_user.todos.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     redirect_to todos_path, alert: "Todo not found."
   end
@@ -100,7 +109,7 @@ class TodosController < ApplicationController
   end
 
   def filter_todos
-    todos = Todo.all
+    todos = current_user.todos
 
     case params[:filter]
     when "completed"
@@ -124,12 +133,14 @@ class TodosController < ApplicationController
   end
 
   def calculate_stats
+    user_todos = current_user.todos
+
     {
-      total: Todo.count,
-      completed: Todo.completed.count,
-      pending: Todo.pending.count,
-      overdue: Todo.overdue.count,
-      due_soon: Todo.due_soon.count
+      total: user_todos.count,
+      completed: user_todos.completed.count,
+      pending: user_todos.pending.count,
+      overdue: user_todos.overdue.count,
+      due_soon: user_todos.due_soon.count
     }
   end
 end

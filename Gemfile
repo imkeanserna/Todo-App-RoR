@@ -14,6 +14,9 @@ gem "jbuilder"
 # Import maps for Rails
 gem "importmap-rails"
 
+# Devise
+gem 'devise'
+
 # Tailwind CSS is a utility-first CSS framework for creating custom designs [https://tailwindcss.com/docs/installation#ruby-on-rails]
 gem "tailwindcss-rails"
 

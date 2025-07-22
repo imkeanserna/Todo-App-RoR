@@ -1,7 +1,10 @@
 class Todo < ApplicationRecord
+  belongs_to :user
+
   # Validations
   validates :title, presence: true, length: { minimum: 1, maximum: 255 }
   validates :description, length: { maximum: 1000 }
+  validates :user, presence: true
 
   # Enums
   enum :priority, { low: 0, medium: 1, high: 2, urgent: 3 }
