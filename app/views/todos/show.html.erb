@@ -1,0 +1,71 @@
+<div class="max-w-4xl mx-auto">
+  <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+      <h3 class="text-xl font-semibold text-gray-800"><%= @todo.title %></h3>
+      <div class="flex gap-2">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-<%= @todo.priority_color == 'secondary' ? 'gray' : @todo.priority_color %>-100 text-<%= @todo.priority_color == 'secondary' ? 'gray' : @todo.priority_color %>-800">
+          <%= @todo.priority.humanize %>
+        </span>
+        <% if @todo.completed? %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">Completed</span>
+        <% else %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">Pending</span>
+        <% end %>
+      </div>
+    </div>
+    
+    <div class="px-6 py-6">
+      <% if @todo.description.present? %>
+        <div class="prose max-w-none mb-6">
+          <%= simple_format(@todo.description, class: "text-gray-700 leading-relaxed") %>
+        </div>
+      <% end %>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span class="text-gray-500">Created: <%= @todo.created_at.strftime("%B %d, %Y at %I:%M %p") %></span>
+        </div>
+        <div class="md:text-right">
+          <% if @todo.due_date.present? %>
+            <span class="text-blue-600">Due: <%= @todo.due_date.strftime("%B %d, %Y at %I:%M %p") %></span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+      <div class="flex flex-wrap gap-3">
+        <% unless @todo.completed? %>
+          <%= button_to toggle_todo_path(@todo), 
+              method: :patch, 
+                     class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center",
+                     data: { confirm: "Mark as complete?" } do %>
+            <i class="fas fa-check mr-2"></i> Mark Complete
+          <% end %>
+        <% else %>
+              <%= button_to toggle_todo_path(@todo), 
+              method: :patch, 
+                     class: "bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center",
+                     data: { confirm: "Mark as incomplete?" } do %>
+            <i class="fas fa-undo mr-2"></i> Mark Incomplete
+          <% end %>
+        <% end %>
+        
+        <%= link_to edit_todo_path(@todo), class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center" do %>
+          <i class="fas fa-edit mr-2"></i> Edit
+        <% end %>
+        
+        <%= button_to @todo, 
+                   method: :delete, 
+                   class: "bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center",
+                   data: { confirm: "Are you sure?" } do %>
+          <i class="fas fa-trash mr-2"></i> Delete
+        <% end %>
+        
+        <%= link_to todos_path, class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center" do %>
+          <i class="fas fa-arrow-left mr-2"></i> Back to List
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

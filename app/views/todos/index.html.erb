@@ -1,0 +1,207 @@
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+  <div class="mb-4 md:mb-0">
+    <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+      <i class="fas fa-tasks mr-3 text-gray-600"></i> My Todos
+    </h1>
+  </div>
+  <div>
+    <%= link_to new_todo_path, class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center" do %>
+      <i class="fas fa-plus mr-2"></i> New Todo
+    <% end %>
+  </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="bg-blue-500 text-white rounded-lg shadow-md">
+    <div class="p-6">
+      <h5 class="text-2xl font-bold"><%= @stats[:total] %></h5>
+      <small class="text-blue-100">Total Todos</small>
+    </div>
+  </div>
+  <div class="bg-yellow-500 text-white rounded-lg shadow-md">
+    <div class="p-6">
+      <h5 class="text-2xl font-bold"><%= @stats[:pending] %></h5>
+      <small class="text-yellow-100">Pending</small>
+    </div>
+  </div>
+  <div class="bg-green-500 text-white rounded-lg shadow-md">
+    <div class="p-6">
+      <h5 class="text-2xl font-bold"><%= @stats[:completed] %></h5>
+      <small class="text-green-100">Completed</small>
+    </div>
+  </div>
+  <div class="bg-red-500 text-white rounded-lg shadow-md">
+    <div class="p-6">
+      <h5 class="text-2xl font-bold"><%= @stats[:overdue] %></h5>
+      <small class="text-red-100">Overdue</small>
+    </div>
+  </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="md:col-span-2">
+    <%= form_with url: todos_path, method: :get, class: "flex gap-2", local: true do |form| %>
+      <%= form.text_field :search, placeholder: "Search todos...", 
+                         value: params[:search], 
+                         class: "flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" %>
+      <%= form.submit "Search", class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition duration-200" %>
+    <% end %>
+  </div>
+  <div class="relative">
+    <div class="dropdown relative">
+      <button class="w-full bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center" 
+              type="button" onclick="toggleDropdown()">
+        Filter: <%= params[:filter]&.humanize || 'All' %>
+        <i class="fas fa-chevron-down ml-2"></i>
+      </button>
+      <div id="dropdown-menu" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+        <%= link_to "All", todos_path, class: "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700" %>
+        <%= link_to "Pending", todos_path(filter: 'pending'), class: "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700" %>
+        <%= link_to "Completed", todos_path(filter: 'completed'), class: "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700" %>
+        <%= link_to "Overdue", todos_path(filter: 'overdue'), class: "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700" %>
+        <%= link_to "Due Soon", todos_path(filter: 'due_soon'), class: "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700" %>
+        <%= link_to "High Priority", todos_path(filter: 'high_priority'), class: "block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk Actions Form -->
+<%= form_with url: bulk_action_todos_path, method: :post, 
+              class: "mb-6", id: "bulk-form", local: true do |form| %>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <%= form.button "Mark Selected as Complete", type: "submit", 
+                   name: "bulk_action_type", value: "complete", 
+                   class: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition duration-200",
+                   data: { confirm: "Mark selected todos as complete?" } %>
+    <%= form.button "Delete Selected", type: "submit", 
+                   name: "bulk_action_type", value: "delete", 
+                   class: "bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition duration-200",
+                   data: { confirm: "Are you sure you want to delete selected todos?" } %>
+  </div>
+
+  <!-- Pending Todos -->
+  <% if @pending_todos.any? %>
+    <div class="bg-white rounded-lg shadow-md mb-6">
+      <div class="bg-yellow-500 text-white px-6 py-4 rounded-t-lg">
+        <h5 class="text-lg font-semibold flex items-center">
+          <i class="fas fa-clock mr-2"></i> Pending Todos
+        </h5>
+      </div>
+      <div class="p-6">
+        <% @pending_todos.each do |todo| %>
+          <div class="flex items-center p-4 mb-3 rounded-lg <%= 'bg-red-50 border border-red-200' if todo.overdue? %>">
+            <div class="mr-4">
+              <%= form.check_box "todo_ids[]", { value: todo.id, class: "w-4 h-4 text-blue-600 rounded focus:ring-blue-500" }, todo.id, "" %>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center mb-2">
+                <h6 class="text-lg font-medium text-gray-800 mr-3"><%= todo.title %></h6>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= todo.priority_color == 'secondary' ? 'gray' : todo.priority_color %>-100 text-<%= todo.priority_color == 'secondary' ? 'gray' : todo.priority_color %>-800">
+                  <%= todo.priority.humanize %>
+                </span>
+                <% if todo.overdue? %>
+                  <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Overdue</span>
+                <% elsif todo.due_soon? %>
+                  <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Due Soon</span>
+                <% end %>
+              </div>
+              <% if todo.description.present? %>
+                <p class="text-sm text-gray-600 mb-1"><%= truncate(todo.description, length: 100) %></p>
+              <% end %>
+              <% if todo.due_date.present? %>
+                <p class="text-sm text-blue-600">Due: <%= todo.due_date.strftime("%B %d, %Y at %I:%M %p") %></p>
+              <% end %>
+            </div>
+            <div class="flex gap-2">
+              <%= link_to todo_path(todo), method: :delete, 
+                         class: "bg-green-600 hover:bg-green-700 text-white p-2 rounded transition duration-200",
+                         data: { confirm: "Mark as complete?" } do %>
+                <i class="fas fa-check"></i>
+              <% end %>
+              <%= link_to edit_todo_path(todo), class: "bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition duration-200" do %>
+                <i class="fas fa-edit"></i>
+              <% end %>
+              <%= link_to todo_path(todo), method: :delete, 
+                         class: "bg-red-600 hover:bg-red-700 text-white p-2 rounded transition duration-200",
+                         data: { confirm: "Are you sure?" } do %>
+                <i class="fas fa-trash"></i>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Completed Todos -->
+  <% if @completed_todos.any? %>
+    <div class="bg-white rounded-lg shadow-md">
+      <div class="bg-green-500 text-white px-6 py-4 rounded-t-lg">
+        <h5 class="text-lg font-semibold flex items-center">
+          <i class="fas fa-check-circle mr-2"></i> Completed Todos
+        </h5>
+      </div>
+      <div class="p-6">
+        <% @completed_todos.each do |todo| %>
+          <div class="flex items-center p-4 mb-3 rounded-lg bg-gray-50">
+            <div class="mr-4">
+              <%= form.check_box "todo_ids[]", { value: todo.id, class: "w-4 h-4 text-blue-600 rounded focus:ring-blue-500" }, todo.id, "" %>
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center mb-2">
+                <h6 class="text-lg font-medium text-gray-500 line-through mr-3"><%= todo.title %></h6>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-<%= todo.priority_color == 'secondary' ? 'gray' : todo.priority_color %>-100 text-<%= todo.priority_color == 'secondary' ? 'gray' : todo.priority_color %>-800">
+                  <%= todo.priority.humanize %>
+                </span>
+              </div>
+              <% if todo.description.present? %>
+                <p class="text-sm text-gray-500 mb-1"><%= truncate(todo.description, length: 100) %></p>
+              <% end %>
+              <p class="text-sm text-green-600">Completed: <%= todo.updated_at.strftime("%B %d, %Y") %></p>
+            </div>
+            <div class="flex gap-2">
+              <%= link_to todo_path(todo), method: :delete, 
+                         class: "bg-yellow-600 hover:bg-yellow-700 text-white p-2 rounded transition duration-200",
+                         data: { confirm: "Mark as incomplete?" } do %>
+                <i class="fas fa-undo"></i>
+              <% end %>
+              <%= link_to todo_path(todo), method: :delete, 
+                         class: "bg-red-600 hover:bg-red-700 text-white p-2 rounded transition duration-200",
+                         data: { confirm: "Are you sure?" } do %>
+                <i class="fas fa-trash"></i>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+<% end %>
+
+<% if @pending_todos.empty? && @completed_todos.empty? %>
+  <div class="text-center py-16">
+    <i class="fas fa-clipboard-list text-6xl text-gray-400 mb-6"></i>
+    <h3 class="text-2xl font-medium text-gray-500 mb-2">No todos found</h3>
+    <p class="text-gray-400 mb-6">Start by creating your first todo!</p>
+    <%= link_to "Create Todo", new_todo_path, class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200" %>
+  </div>
+<% end %>
+
+<script>
+function toggleDropdown() {
+  const dropdown = document.getElementById('dropdown-menu');
+  dropdown.classList.toggle('hidden');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+  const dropdown = document.getElementById('dropdown-menu');
+  const button = event.target.closest('button');
+  if (!button || !button.onclick) {
+    dropdown.classList.add('hidden');
+  }
+});
+</script>

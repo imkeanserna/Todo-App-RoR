@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+ <head>
+    <title>Todo App</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag 'tailwind', 'data-turbo-track': 'reload' %>
+    <%= javascript_importmap_tags %>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  </head>
+
+<body class="bg-gray-50 min-h-screen text-gray-900">
+    <nav class="bg-white border-b border-gray-200 shadow-sm mb-6">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <%= link_to "Todo App", root_path, class: "text-xl font-semibold text-gray-800 hover:text-gray-600 transition-colors" %>
+        </div>
+      </div>
+    </nav>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <% if notice %>
+        <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 relative shadow-sm" role="alert">
+          <span class="block sm:inline"><%= notice %></span>
+          <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+            <button type="button" class="text-green-600 hover:text-green-800 transition-colors" onclick="this.parentElement.parentElement.remove()">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </span>
+        </div>
+      <% end %>
+      <% if alert %>
+        <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 relative shadow-sm" role="alert">
+          <span class="block sm:inline"><%= alert %></span>
+          <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+            <button type="button" class="text-red-600 hover:text-red-800 transition-colors" onclick="this.parentElement.parentElement.remove()">
+              <i class="fas fa-times text-sm"></i>
+            </button>
+          </span>
+        </div>
+      <% end %>
+      <%= yield %>
+    </div>
+  </body>
+</html>
